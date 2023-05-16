@@ -6,6 +6,8 @@ st.title("YouTube Downloader")
 
 st.write("Welcome to the YouTube Downloader app! With this app, you can easily download videos from YouTube and save them to your local device for offline viewing.")
 
+st.write("Please note that the downloaded videos are intended for personal use only and should not be shared or distributed without the copyright owner's permission.")
+
 video_url = st.text_input("Enter the YouTube video URL:")
 
 if video_url:
@@ -30,40 +32,31 @@ if video_url:
 
         video_streams = yt.streams.filter(file_extension="mp4", only_video=True, progressive=True).order_by('resolution').desc().all()
 
-        
+        if len(video_streams) == 0:
 
-        stream = video_streams[0]
+            st.write("No download options available for this video.")
 
-        format_resolution = f"{stream.resolution} ({stream.mime_type})"
+        else:
 
-        st.write(format_resolution)
+            stream = video_streams[0]
 
-        download_button = st.button("Download", key=stream.itag)
+            format_resolution = f"{stream.resolution} ({stream.mime_type})"
 
-        if download_button:
+            st.write(format_resolution)
 
-            with st.spinner("Downloading..."):
+            download_button = st.button("Download", key=stream.itag)
+
+            if download_button:
 
                 download_path = f"{yt.title}.{stream.subtype}"
 
                 stream.download(filename=download_path)
 
-            st.success("Video downloaded successfully!")
-
-            st.markdown(f"**Download Link:** [Click here to download]({download_path})")
+                st.success(f"Video downloaded successfully. Saved as '{download_path}'")
 
     except Exception as e:
 
         st.error(f"Error: {str(e)}")
 
 
-
-
-
-
-
-
-
-
-
-
+        
