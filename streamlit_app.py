@@ -2,69 +2,55 @@ import streamlit as st
 
 from pytube import YouTube
 
-from pytube.extract import video_id
-
 st.title("YouTube Downloader")
 
 st.write("Welcome to the YouTube Downloader app! With this app, you can easily download videos from YouTube and save them to your local device for offline viewing.")
 
-st.write("Please note that the downloaded videos are intended for personal use only and should not be shared or distributed without the copyright owner's permission.")
-
 video_url = st.text_input("Enter the YouTube video URL:")
 
-if st.button("Download") and video_url:
+if video_url:
 
     try:
 
-        # Validate the URL
+        yt = YouTube(video_url)
 
-        video_id = video_id(video_url)
+        st.subheader("Video Details")
 
-        if video_id is None:
+        st.write(f"Title: {yt.title}")
 
-            st.error("Invalid YouTube video URL. Please enter a valid URL.")
+        st.write(f"Duration: {yt.length} seconds")
 
-        else:
+        st.write(f"Views: {yt.views}")
 
-            yt = YouTube(f"https://youtube.com/watch?v={video_id}")
+        st.image(yt.thumbnail_url)
 
-            st.subheader("Video Details")
+        st.subheader("Download Options")
 
-            st.write(f"Title: {yt.title}")
+        st.write("Select the highest resolution available for download (excluding YouTube subscription streams):")
 
-            st.write(f"Duration: {yt.length} seconds")
+        download_options = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc()
 
-            st.write(f"Views: {yt.views}")
+        for option in download_options:
 
-            st.image(yt.thumbnail_url)
+            st.write(f"{option.resolution} ({option.mime_type})")
 
-            video_streams = yt.streams.filter(file_extension="mp4", only_video=True, progressive=True).order_by('resolution').desc().all()
+            download_button = st.button("Download", key=option.itag)
 
-            if len(video_streams) == 0:
+            if download_button:
 
-                st.warning("No download options available for this video.")
+                download_path = f"{yt.title}.{option.subtype}"
 
-            else:
+                option.download(filename=download_path)
 
-                stream = video_streams[0]
+                st.success(f"Video downloaded successfully. Saved as '{download_path}'")
 
-                format_resolution = f"{stream.resolution} ({stream.mime_type})"
-
-                st.write(format_resolution)
-
-                download_path = f"{yt.title}.{stream.subtype}"
-
-                if st.button("Download", key=stream.itag):
-
-                    with st.spinner("Downloading..."):
-
-                        stream.download(filename=download_path)
-
-                    st.success(f"Video downloaded successfully. Saved as '{download_path}'")
+                break  # Stop looping after the first successful download
 
     except Exception as e:
 
-        st.error(f"An error occurred: {str(e)}")
+        st.error(f"Error: {str(e)}")
+
+
 
 
 
