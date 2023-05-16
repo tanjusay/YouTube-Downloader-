@@ -1,12 +1,10 @@
 import streamlit as st
 
-from pytube import YouTube
+import subprocess
 
 st.title("YouTube Downloader")
 
 st.write("Welcome to the YouTube Downloader app! With this app, you can easily download videos from YouTube and save them to your local device for offline viewing.")
-
-st.write("Please note that the downloaded videos are intended for personal use only and should not be shared or distributed without the copyright owner's permission.")
 
 video_url = st.text_input("Enter the YouTube video URL:")
 
@@ -14,49 +12,35 @@ if video_url:
 
     try:
 
-        yt = YouTube(video_url)
-
-        st.subheader("Video Details")
-
-        st.write(f"Title: {yt.title}")
-
-        st.write(f"Duration: {yt.length} seconds")
-
-        st.write(f"Views: {yt.views}")
-
-        st.image(yt.thumbnail_url)
-
         st.subheader("Download Options")
 
-        st.write("Select the highest resolution available for download (excluding YouTube subscription streams):")
+        st.write("Select the video format and quality:")
 
-        video_streams = yt.streams.filter(file_extension="mp4", only_video=True, progressive=True).order_by('resolution').desc().all()
+        download_options = subprocess.check_output(['youtube-dl', '-F', video_url]).decode().strip().split('\n')[1:]
 
-        if len(video_streams) == 0:
+        download_formats = [opt.split() for opt in download_options]
 
-            st.write("No download options available for this video.")
+        for format_code, extension, resolution, _, _ in download_formats:
 
-        else:
+            st.write(f"Format Code: {format_code} | Extension: {extension} | Resolution: {resolution}")
 
-            stream = video_streams[0]
+        selected_format = st.selectbox("Select a format:", [f"{format_code} ({extension})" for format_code, extension, _, _, _ in download_formats])
 
-            format_resolution = f"{stream.resolution} ({stream.mime_type})"
+        if st.button("Download"):
 
-            st.write(format_resolution)
+            format_code = selected_format.split()[0]
 
-            download_button = st.button("Download", key=stream.itag)
+            download_path = f"{st.text_input('Enter the filename:', value='video')}.{selected_format.split()[2]}"
 
-            if download_button:
+            subprocess.call(['youtube-dl', '-f', format_code, '-o', download_path, video_url])
 
-                download_path = f"{yt.title}.{stream.subtype}"
-
-                stream.download(filename=download_path)
-
-                st.success(f"Video downloaded successfully. Saved as '{download_path}'")
+            st.success(f"Video downloaded successfully. Saved as '{download_path}'")
 
     except Exception as e:
 
         st.error(f"Error: {str(e)}")
 
 
-        
+
+
+
