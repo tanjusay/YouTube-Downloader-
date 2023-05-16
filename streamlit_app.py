@@ -28,23 +28,29 @@ if video_url:
 
         st.write("Select the highest resolution available for download (excluding YouTube subscription streams):")
 
-        download_options = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc()
+        video_streams = yt.streams.filter(file_extension="mp4", only_video=True, progressive=True).order_by('resolution').desc().all()
 
-        for option in download_options:
+        
 
-            st.write(f"{option.resolution} ({option.mime_type})")
+        stream = video_streams[0]
 
-            download_button = st.button("Download", key=option.itag)
+        format_resolution = f"{stream.resolution} ({stream.mime_type})"
 
-            if download_button:
+        st.write(format_resolution)
 
-                download_path = f"{yt.title}.{option.subtype}"
+        download_button = st.button("Download", key=stream.itag)
 
-                option.download(filename=download_path)
+        if download_button:
 
-                st.success(f"Video downloaded successfully. Saved as '{download_path}'")
+            with st.spinner("Downloading..."):
 
-                break  # Stop looping after the first successful download
+                download_path = f"{yt.title}.{stream.subtype}"
+
+                stream.download(filename=download_path)
+
+            st.success("Video downloaded successfully!")
+
+            st.markdown(f"**Download Link:** [Click here to download]({download_path})")
 
     except Exception as e:
 
@@ -56,4 +62,8 @@ if video_url:
 
 
 
- 
+
+
+
+
+
