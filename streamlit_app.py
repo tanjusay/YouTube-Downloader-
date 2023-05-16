@@ -2,7 +2,7 @@ import streamlit as st
 
 from pytube import YouTube
 
-from pytube.helpers import validate_url
+from pytube.extract import video_id
 
 st.title("YouTube Downloader")
 
@@ -18,13 +18,15 @@ if st.button("Download") and video_url:
 
         # Validate the URL
 
-        if not validate_url(video_url):
+        video_id = video_id(video_url)
+
+        if video_id is None:
 
             st.error("Invalid YouTube video URL. Please enter a valid URL.")
 
         else:
 
-            yt = YouTube(video_url)
+            yt = YouTube(f"https://youtube.com/watch?v={video_id}")
 
             st.subheader("Video Details")
 
@@ -63,6 +65,8 @@ if st.button("Download") and video_url:
     except Exception as e:
 
         st.error(f"An error occurred: {str(e)}")
+
+
 
 
 
