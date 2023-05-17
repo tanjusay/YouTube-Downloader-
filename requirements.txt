@@ -1,8 +1,12 @@
-youtube-dl
-subprocess
+"home/appuser/venv/bin/python" -m pip install --upgrade pip' 
+
+streamlit
+
 pandas
 
-pip==latest
-pytube==latest
+matplotlib
 
+youtube_dl
+
+pip install pytube
 
