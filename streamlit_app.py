@@ -1,25 +1,38 @@
 import streamlit as st
 
-import subprocess
+from pytube import YouTube
 
 st.title("YouTube Downloader")
 
-st.write("Welcome to the YouTube Downloader app! With this app, you can easily download videos from YouTube and save them to your local device for offline viewing.")
-
-video_url = st.text_input("Enter the YouTube video URL:")
-
-if st.button("Download"):
+def download_video(video_url):
 
     try:
 
-        command = f"youtube-dl -f bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best {video_url}"
+        youtube_object = YouTube(video_url)
 
-        subprocess.call(command, shell=True)
+        youtube_object = youtube_object.streams.get_highest_resolution()
 
-        st.success("Video downloaded successfully!")
+        youtube_object.download()
+
+        st.success("Video downloaded successfully.")
 
     except Exception as e:
 
-        st.error(f"An error occurred: {str(e)}")
+        st.error(f"Error: {str(e)}")
 
+video_url = st.text_input("Enter the YouTube video URL")
+
+st.write("This will download the highest resolution available for the video.")
+
+if st.button("Download"):
+
+    if video_url:
+
+        download_video(video_url)
+
+    else:
+
+        st.warning("Please enter a valid YouTube video URL.")
+
+ 
 
