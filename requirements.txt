@@ -1,2 +1,8 @@
 youtube-dl
 subprocess
+pandas
+
+pip==latest
+pytube==latest
+
+
